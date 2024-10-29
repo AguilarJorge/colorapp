@@ -3,14 +3,19 @@ import { io } from 'socket.io-client';
 import { HexColorPicker } from "react-colorful";
 import './App.css';
 import logo from './logo.png';
+import Login from './components/Login.js';
+import ChatHistory from './components/ChatHistory.js';
+import ChatSender from './components/ChatSender.js';
 
 const SERVER = `${process.env.REACT_APP_SERVER_HOST}:${process.env.REACT_APP_SERVER_PORT}`;
 const socket = io(SERVER);
 
-function App() {
+const App = () => {
   const [user, setUser] = useState(null);
   const [code, setCode] = useState(null);
   const [color, setColor] = useState("#aabbcc");
+  const [chats, setChats] = useState([]);
+  const [currentMessage, setCurrentMessage] = useState('');
 
   useEffect(() => {
     const userId = localStorage.getItem('user');
@@ -21,8 +26,14 @@ function App() {
     })
   }, [user])
 
+  useEffect(() => {
+    socket.on('update-messages', (message) => {
+      setChats([...chats, message]);
+    })
+  }, [chats])
 
-  const authUser = async () => {
+
+  const handleAuthUser = async () => {
     const req = await fetch(`${SERVER}/auth`, {
       method: 'POST',
       headers: {
@@ -36,29 +47,38 @@ function App() {
       localStorage.setItem('user', userId);
       setUser(userId);
     }
-    console.log(res);
   }
   const handleChangeColor = (color) => {
     socket.emit('send-color', color, () => {});
   }
+  const handleSendChat = () => {
+    if (!currentMessage.trim()) return;
+    setCurrentMessage('');
+    const contentEditable = document.querySelector('.chat-input');
+    if (contentEditable) contentEditable.innerHTML = '';
+    socket.emit('send-message', currentMessage, () => {});
+  }
 
   return (
     <div className="app" style={{ backgroundColor: color }}>
-      <div className="app-login">
-        <img src={logo} alt="App logo" width={300} height={300} />
-        <h1 className="app-title" style={{ marginBottom: 30 }}>ColorApp</h1>
-        <label htmlFor="code" style={{ fontSize: 20 }}>Ingresa el codigo para iniciar sesión</label>
-        <input className="app-input-code" id="code" type="text" onChange={(e) => setCode(e.currentTarget.value)} />
-        <div className="app-button" onClick={authUser}>Enviar</div>
-      </div>
-      {user && <h1 className="app-title">{user}</h1>}
-      {!user ?
-        <div>
-        </div> : user === 'HOST' ? 
-        <div className="color-selector-wrapper">
-          <HexColorPicker color={color} onChange={(color) => handleChangeColor(color)} />
-        </div> :
-        <div>Esperando color</div>
+      {!user
+        ? <Login logo={logo} onClick={handleAuthUser} updateCode={(code) => setCode(code)} />
+        : user === 'HOST' ? (
+          <div className="app-host" style={{ height: '100%' }}>
+            <h1 className="user-title">Eres el <b>{user}</b> de la app, solo tu puedes controlar el color y enviar mensaje a los clientes.</h1>
+            <div className="color-selector-wrapper">
+              <div className="chat-overlay" style={{ background: `linear-gradient(${color}, transparent)` }} />
+              <HexColorPicker color={color} onChange={(color) => handleChangeColor(color)} />
+            </div>
+            <ChatHistory chats={chats} />
+            <ChatSender currentMessage={currentMessage} handleSendChat={handleSendChat} onInput={setCurrentMessage} />
+          </div>
+        ) : (
+          <div className="app-client">
+              <div className="chat-overlay" style={{ background: `linear-gradient(${color}, transparent)` }} />
+              <ChatHistory chats={chats} />
+          </div>
+        )
       }
     </div>
   );

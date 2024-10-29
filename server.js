@@ -37,5 +37,8 @@ io.on('connection', (socket) => {
   socket.emit('connection', null);
   socket.on('send-color', (color) => {
     io.emit('change-color', color);
-  })
+  });
+  socket.on('send-message', (message) => {
+    io.emit('update-messages', message);
+  });
 })
