@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { HexColorPicker } from "react-colorful";
 import './App.css';
+import logo from './logo.png';
 
-const SERVER = 'http://localhost:8080';
+const SERVER = `${process.env.REACT_APP_SERVER_HOST}:${process.env.REACT_APP_SERVER_PORT}`;
 const socket = io(SERVER);
 
 function App() {
@@ -13,17 +14,13 @@ function App() {
 
   useEffect(() => {
     const userId = localStorage.getItem('user');
-    console.log({ userId });
     if (userId) setUser(userId);
-  }, [])
 
-  socket.on('connection', () => {
-    console.log('Enchufado con el back');
-  })
-  socket.on('change-color', (color) => {
-    console.log(`Recibiendo color: ${color}`);
-    setColor(color);
-  })
+    socket.on('change-color', (color) => {
+      if (userId) setColor(color);
+    })
+  }, [user])
+
 
   const authUser = async () => {
     const req = await fetch(`${SERVER}/auth`, {
@@ -47,13 +44,16 @@ function App() {
 
   return (
     <div className="app" style={{ backgroundColor: color }}>
-      <h1 className="app-title" style={{ marginBottom: 10 }}>ColorApp</h1>
+      <div className="app-login">
+        <img src={logo} alt="App logo" width={300} height={300} />
+        <h1 className="app-title" style={{ marginBottom: 30 }}>ColorApp</h1>
+        <label htmlFor="code" style={{ fontSize: 20 }}>Ingresa el codigo para iniciar sesión</label>
+        <input className="app-input-code" id="code" type="text" onChange={(e) => setCode(e.currentTarget.value)} />
+        <div className="app-button" onClick={authUser}>Enviar</div>
+      </div>
       {user && <h1 className="app-title">{user}</h1>}
       {!user ?
         <div>
-          <label htmlFor="code">Ingresa el codigo</label>
-          <input id="code" type="text" onChange={(e) => setCode(e.currentTarget.value)} />
-          <button onClick={authUser}>Enviar</button>
         </div> : user === 'HOST' ? 
         <div className="color-selector-wrapper">
           <HexColorPicker color={color} onChange={(color) => handleChangeColor(color)} />

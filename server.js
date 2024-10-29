@@ -5,24 +5,21 @@ import helmet from 'helmet';
 import { Server } from 'socket.io';
 
 const app = express();
-app.use(cors({ origin: '*' }));
+app.use(cors({ origin: process.env.REACT_APP_CLIENT_HOST }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
+if (process.env.NODE_ENV === 'production') require('dotenv').config();
 const server = createServer(app);
-const io = new Server(server, { cors: { origin: 'http://localhost:3000' }});
-
-const PORT = 8080;
-const HOST_CODE = '123';
-const USER_CODE = '456';
-
+const io = new Server(server, { cors: { origin: process.env.REACT_APP_CLIENT_HOST }});
+const PORT = process.env.REACT_APP_SERVER_PORT;
 
 app.post('/auth', (req, res) => {
   try {
     const { code } = req.body;
-    if (code === HOST_CODE) {
+    if (code.toUpperCase() === process.env.REACT_APP_HOST_CODE) {
       res.status(200).json({ data: { userType: 'HOST' }, message: 'Eres host', success: true, error: false });
-    } else if(code === USER_CODE) {
+    } else if (code === process.env.REACT_APP_USER_CODE) {
       res.status(200).json({ data: { userType: 'CLIENT' }, message: 'Eres cliente', success: true, error: false});
     } else {
       res.status(400).json({ data: null, mensaje: 'El codigo ingresado es incorrecto. Por favor consulta a tu host.', success: false, error: 'INVALID_CODE' });

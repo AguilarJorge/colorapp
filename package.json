@@ -9,17 +9,19 @@
     "@testing-library/user-event": "^13.5.0",
     "ajv": "^8.17.1",
     "ajv-keywords": "^5.1.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "helmet": "^8.0.0",
     "react": "^18.3.1",
     "react-colorful": "^5.6.1",
     "react-dom": "^18.3.1",
     "react-scripts": "5.0.1",
+    "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
-    "web-vitals": "^2.1.4",
-    "express": "^4.21.1",
-    "helmet": "^8.0.0",
-    "socket.io": "^4.8.1"
+    "web-vitals": "^2.1.4"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "nodemon": "^3.1.7"
   },
   "scripts": {
@@ -27,7 +29,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "upserver": "nodemon server.js"
+    "upserver": "nodemon -r dotenv/config server.js"
   },
   "eslintConfig": {
     "extends": [
