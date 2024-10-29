@@ -17,9 +17,9 @@ const PORT = process.env.REACT_APP_SERVER_PORT;
 app.post('/auth', (req, res) => {
   try {
     const { code } = req.body;
-    if (code.toUpperCase() === process.env.REACT_APP_HOST_CODE) {
+    if (code.toUpperCase() === process.env.HOST_CODE) {
       res.status(200).json({ data: { userType: 'HOST' }, message: 'Eres host', success: true, error: false });
-    } else if (code === process.env.REACT_APP_USER_CODE) {
+    } else if (code === process.env.USER_CODE) {
       res.status(200).json({ data: { userType: 'CLIENT' }, message: 'Eres cliente', success: true, error: false});
     } else {
       res.status(400).json({ data: null, mensaje: 'El codigo ingresado es incorrecto. Por favor consulta a tu host.', success: false, error: 'INVALID_CODE' });
