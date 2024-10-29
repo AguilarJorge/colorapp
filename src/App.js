@@ -7,7 +7,7 @@ import Login from './components/Login.js';
 import ChatHistory from './components/ChatHistory.js';
 import ChatSender from './components/ChatSender.js';
 
-const SERVER = `${process.env.REACT_APP_SERVER_HOST}:${process.env.REACT_APP_SERVER_PORT}`;
+const SERVER = `${process.env.REACT_APP_SERVER_HOST}`;
 const socket = io(SERVER);
 
 const App = () => {
